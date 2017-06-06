@@ -9,6 +9,7 @@ const App = ({actions}) => (
     <div className="App-intro">
       <button onClick={actions.newScene}>reroll</button>
       <button onClick={actions.toggle}>play/pause</button>
+      <pre style={{textAlign: 'left', fontSize: '80%'}}>{JSON.stringify(window.ctx, null, 2)}</pre>
     </div>
   </div>
 );

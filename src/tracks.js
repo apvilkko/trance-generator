@@ -8,5 +8,6 @@ const BS = 'BS';
 const MB = 'MB';
 const RD = 'RD';
 const SN = 'SN';
+const LD = 'LD';
 
-export default {BD, BS, MB, CL, HC, HO, ST, PR, RD, SN};
+export default {BD, BS, MB, CL, HC, HO, ST, PR, RD, SN, LD};

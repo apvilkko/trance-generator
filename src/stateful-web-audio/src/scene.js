@@ -1,5 +1,5 @@
 import {commit} from './state';
-import {getContext} from './util';
+import {getContext, connect} from './util';
 import {loadSample} from './loader';
 import {createInsertEffect, addInsert, setNodeGain} from './mixer';
 import * as components from './components';
@@ -38,9 +38,21 @@ const setupInsert = (ctx, key, insert, index) => {
 };
 
 const setupScene = ctx => {
-  const {state: {scene: {parts}}} = ctx;
+  const {runtime, state: {mixer, scene: {parts, synths}}} = ctx;
+  runtime.synths = {};
+  Object.keys(synths).forEach(synth => {
+    runtime.synths[synth] = components.createSynth({
+      context: getContext(ctx),
+      options: synths[synth]
+    });
+  });
   Object.keys(parts).forEach(part => {
-    loadSample(ctx, parts[part].sample);
+    if (parts[part].sample) {
+      loadSample(ctx, parts[part].sample);
+    }
+    if (parts[part].synth) {
+      connect(runtime.synths[parts[part].synth], mixer.tracks[part].gain);
+    }
     if (parts[part].inserts) {
       parts[part].inserts.forEach((insert, i) => setupInsert(ctx, part, insert, i));
     }

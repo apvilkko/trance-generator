@@ -32,7 +32,8 @@
     "no-restricted-globals": 0,
     "spaced-comment": 0,
     "arrow-parens": ["error", "as-needed"],
-    "no-param-reassign": ["error", {"props": false}]
+    "no-param-reassign": ["error", {"props": false}],
+    "no-restricted-properties": 0
   },
   "plugins": [
     "import"

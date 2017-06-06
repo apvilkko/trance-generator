@@ -1,6 +1,6 @@
 import {randRange, randRangeFloat, maybe, sample, rand} from './util';
 import tracks from './tracks';
-import {createPattern} from './pattern';
+import {createPattern, createLeadPattern} from './pattern';
 import styles, {
   FOURBYFOUR, BROKEN, OFFBEATS, RANDBUSY, TWOANDFOUR,
   RANDSPARSE, OCCASIONAL, SUBBASS1, SUBBASS2, MIDBASS1
@@ -31,6 +31,15 @@ const randomizeStyle = track => {
   }
 };
 
+const createLead = globalKey => {
+  return {
+    style: null,
+    sample: null,
+    synth: tracks.LD,
+    pattern: createLeadPattern(globalKey)
+  };
+};
+
 const randomizeSample = track => {
   const key = track.toLowerCase();
   const numChoices = catalog[key];
@@ -40,6 +49,9 @@ const randomizeSample = track => {
 const urlify = sample => `samples/${sample}.ogg`;
 
 const createPart = (track, globalKey) => {
+  if (track === tracks.LD) {
+    return createLead(globalKey);
+  }
   const style = randomizeStyle(track);
   const sample = randomizeSample(track);
   console.log('part', sample, style, globalKey);
@@ -76,7 +88,10 @@ export const createScene = () => {
   const newScene = {
     tempo: randRange(132, 140),
     shufflePercentage: maybe(50, 0, randRange(1, 20)),
-    parts: {}
+    parts: {},
+    synths: {
+      [tracks.LD]: {}
+    },
   };
   [
     tracks.BD,
@@ -88,11 +103,13 @@ export const createScene = () => {
     newScene.parts[key] = randomizeEffects(key)(createPart(key));
   });
 
-  newScene.parts[tracks.HO] = createPart(tracks.HO);
-  newScene.parts[tracks.HC] = createPart(tracks.HC);
+  // newScene.parts[tracks.HO] = createPart(tracks.HO);
+  // newScene.parts[tracks.HC] = createPart(tracks.HC);
 
-  newScene.parts[tracks.BS] = createPart(tracks.BS, globalKey);
-  newScene.parts[tracks.MB] = createPart(tracks.MB, globalKey);
+  // newScene.parts[tracks.BS] = createPart(tracks.BS, globalKey);
+  // newScene.parts[tracks.MB] = createPart(tracks.MB, globalKey);
+
+  newScene.parts[tracks.LD] = createPart(tracks.LD, globalKey);
 
   if (rand(70)) {
     // newScene.parts[tracks.RD] = createPart(tracks.RD);

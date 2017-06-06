@@ -27,6 +27,7 @@ const toggle = ctx => {
 };
 
 const ctx = init();
+window.ctx = ctx;
 createMixer(ctx, {
   [tracks.BD]: {gain: 0.7},
   [tracks.CL]: {gain: 0.5},
@@ -34,6 +35,7 @@ createMixer(ctx, {
   [tracks.HO]: {gain: 0.25},
   [tracks.BS]: {gain: 0.4},
   [tracks.MB]: {gain: 0.2},
+  [tracks.LD]: {gain: 0.2},
   /* [tracks.SN]: {gain: 0.4},
   [tracks.ST]: {gain: 0.3},
   [tracks.BS]: {gain: 0.4},

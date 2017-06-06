@@ -137,3 +137,16 @@ export const createPattern = (track, style, globalKey) => {
   const patternLength = prefs[track].patternLength();
   return iteratePattern({patternLength, pitch}, styleIterator[style]);
 };
+
+export const createLeadPattern = globalKey => {
+  return [
+    createNote(127, globalKey),
+    createNote(127, globalKey + 12),
+    createNote(),
+    createNote(127, globalKey),
+    createNote(127, globalKey + 14),
+    createNote(),
+    createNote(127, globalKey + 15),
+    createNote(),
+  ];
+};
