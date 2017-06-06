@@ -6,8 +6,7 @@ const BASE_FREQ = 261.6; // middle C
 
 export const playSynth = ({context, destination, buffer, pitch = 0, instance}) => {
   const freq = BASE_FREQ * Math.pow(2, pitch / 12.0);
-  instance.vco1.frequency.value = freq;
-  console.log(pitch, freq);
+  instance.vco1.frequency.setValueAtTime(freq, context.currentTime);
 };
 
 export const createSynth = ({context, destination}) => {

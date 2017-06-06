@@ -103,11 +103,11 @@ export const createScene = () => {
     newScene.parts[key] = randomizeEffects(key)(createPart(key));
   });
 
-  // newScene.parts[tracks.HO] = createPart(tracks.HO);
-  // newScene.parts[tracks.HC] = createPart(tracks.HC);
+  newScene.parts[tracks.HO] = createPart(tracks.HO);
+  newScene.parts[tracks.HC] = createPart(tracks.HC);
 
-  // newScene.parts[tracks.BS] = createPart(tracks.BS, globalKey);
-  // newScene.parts[tracks.MB] = createPart(tracks.MB, globalKey);
+  newScene.parts[tracks.BS] = createPart(tracks.BS, globalKey);
+  newScene.parts[tracks.MB] = createPart(tracks.MB, globalKey);
 
   newScene.parts[tracks.LD] = createPart(tracks.LD, globalKey);
 

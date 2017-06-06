@@ -46,6 +46,7 @@ const setupScene = ctx => {
       options: synths[synth]
     });
   });
+  // TODO cleanup old connected synths
   Object.keys(parts).forEach(part => {
     if (parts[part].sample) {
       loadSample(ctx, parts[part].sample);
