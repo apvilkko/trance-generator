@@ -2,6 +2,7 @@
   "name": "trance-generator",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://aapee.kapsi.fi/trance-generator",
   "dependencies": {
     "react": "^15.5.4",
     "react-dom": "^15.5.4"

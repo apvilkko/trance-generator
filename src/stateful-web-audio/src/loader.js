@@ -7,7 +7,7 @@ export const init = () => ({
 const doRequest = url => fetch(url).then(response => response.arrayBuffer());
 
 export const loadSample = (ctx, name) => {
-  console.log('loadSample', name);
+  // console.log('loadSample', name);
   const {runtime: {buffers}} = ctx;
   return new Promise(resolve => {
     if (buffers[name]) {

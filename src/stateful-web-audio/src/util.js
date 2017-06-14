@@ -15,15 +15,15 @@ const log = (from, to, disconnect) => {
 const output = from => (from.output ? from.output : from);
 const input = to => (to.input ? to.input : to);
 
-export const connect = (from, to) => {
+export const connect = (from, to, outputIndex = 0, inputIndex = 0) => {
   log(from, to);
-  output(from).connect(input(to));
+  output(from).connect(input(to), outputIndex, inputIndex);
 };
 
 export const disconnect = (node, from) => {
   const src = output(node);
-  const dest = input(from);
   if (from) {
+    const dest = input(from);
     log(node, from, true);
     src.disconnect(dest);
     return;

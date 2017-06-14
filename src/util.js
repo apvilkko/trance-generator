@@ -28,3 +28,25 @@ export const maybe = (prob, opt1, opt2) => {
 
 export const sample = arr =>
   (arr.length > 0 ? arr[randRange(0, arr.length - 1)] : undefined);
+
+function swap(arr, i, j) {
+  // swaps two elements of an array in place
+  const temp = arr[i];
+  arr[i] = arr[j];
+  arr[j] = temp;
+}
+
+const randInt = max => Math.floor(Math.random() * max);
+
+export const shuffle = list => {
+  const arr = [...list];
+  for (let slot = arr.length - 1; slot > 0; slot--) { // eslint-disable-line
+    const element = randInt(slot + 1);
+    swap(arr, element, slot);
+  }
+  return arr;
+};
+
+export const takeRandom = (num, arr) => shuffle(arr).slice(0, num);
+
+export const without = (these, arr) => arr.filter(x => !these.includes(x));

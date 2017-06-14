@@ -8,12 +8,17 @@ import {
   isPlaying,
 } from './stateful-web-audio';
 // import {init as initEvents} from './events';
+import {setParam} from './stateful-web-audio/src/setParam';
 import {createScene} from './scene';
 import tracks from './tracks';
 
 const newScene = ctx => {
   const scene = createScene();
   setScene(ctx, scene);
+};
+
+const breakdown = ctx => {
+  ctx.runtime.sequencer.breakdownStart = ctx.runtime.instances.context.currentTime;
 };
 
 const toggle = ctx => {
@@ -29,17 +34,14 @@ const toggle = ctx => {
 const ctx = init();
 window.ctx = ctx;
 createMixer(ctx, {
-  [tracks.BD]: {gain: 0.7},
-  [tracks.CL]: {gain: 0.5},
-  [tracks.HC]: {gain: 0.1},
-  [tracks.HO]: {gain: 0.25},
-  [tracks.BS]: {gain: 0.4},
-  [tracks.MB]: {gain: 0.2},
-  [tracks.LD]: {gain: 0.2},
-  /* [tracks.SN]: {gain: 0.4},
-  [tracks.ST]: {gain: 0.3},
-  [tracks.BS]: {gain: 0.4},
-  [tracks.RD]: {gain: 0.2}, */
+  [tracks.BD]: {gain: 0.6},
+  [tracks.CL]: {gain: 0.6},
+  [tracks.HC]: {gain: 0.6},
+  [tracks.HO]: {gain: 0.6},
+  [tracks.BS]: {gain: 0.5},
+  [tracks.MB]: {gain: 0.5},
+  [tracks.LD]: {gain: 0.4},
+  [tracks.CR]: {gain: 0.5},
 });
 newScene(ctx);
 start(ctx);
@@ -48,5 +50,7 @@ export const actions = {
   newScene: () => newScene(ctx),
   toggle: () => toggle(ctx),
   isPlaying: () => isPlaying(ctx),
+  setParam: params => evt => setParam({ctx, value: evt.target.value, ...params}),
+  breakdown: () => breakdown(ctx),
 };
 // initEvents(document, actions);

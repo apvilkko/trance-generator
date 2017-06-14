@@ -1,4 +1,4 @@
-export const DEBUG = true;
+export const DEBUG = false;
 const debugEl = typeof document === 'undefined' ? null :
   document.getElementById('debug');
 

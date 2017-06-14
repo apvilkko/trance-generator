@@ -14,16 +14,40 @@
   color: white;
 }
 
-.App-intro {
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+.content {
   margin-top: 1rem;
-  font-size: large;
+  max-width: 30em;
 }
 
 button {
   padding: 1em 2em;
 }
 
+button + button {
+  margin-left: 0.5em;
+}
+
+.params {
+  display: flex;
+  align-items: flex-end;
+}
+
+label {
+  margin-top: 1em;
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.history {
+  margin-top: 5em;
+  font-size: 80%;
+  text-align: left;
 }

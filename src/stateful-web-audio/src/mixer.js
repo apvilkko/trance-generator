@@ -80,12 +80,14 @@ export const createMixer = (ctx, trackSpec) => {
     }),
   };
   Object.keys(trackSpec).forEach(track => {
+    const trackGain = trackSpec[track].gain || 0.6;
     tracks[track] = createTrack({
       gain: createVCA({
         context,
-        gain: trackSpec[track].gain || 0.6,
+        gain: trackGain,
         destination: mixBus
-      })
+      }),
+      trackGain,
     });
   });
 

@@ -5,3 +5,4 @@ export {playSample} from './sampler';
 export {playSynth, createSynth} from './synth';
 export {triggerEnvelope} from './envelope';
 export {createReverb} from './reverb';
+export {createFeedbackDelay, createStereoDelay} from './delay';

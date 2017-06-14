@@ -1,6 +1,6 @@
 import {randRange, randRangeFloat, maybe, sample, rand} from './util';
 import tracks from './tracks';
-import {createPattern, createLeadPattern} from './pattern';
+import {createPattern, createLeadPattern, createTheme} from './pattern';
 import styles, {
   FOURBYFOUR, BROKEN, OFFBEATS, RANDBUSY, TWOANDFOUR,
   RANDSPARSE, OCCASIONAL, SUBBASS1, SUBBASS2, MIDBASS1
@@ -48,17 +48,17 @@ const randomizeSample = track => {
 
 const urlify = sample => `samples/${sample}.ogg`;
 
-const createPart = (track, globalKey) => {
+const createPart = (track, theme) => {
   if (track === tracks.LD) {
-    return createLead(globalKey);
+    return createLead(theme);
   }
   const style = randomizeStyle(track);
   const sample = randomizeSample(track);
-  console.log('part', sample, style, globalKey);
+  // console.log('part', sample, style, theme);
   return {
     style,
     sample: urlify(sample),
-    pattern: createPattern(track, style, globalKey),
+    pattern: track === tracks.CR ? null : createPattern(track, style, theme),
   };
 };
 
@@ -84,13 +84,12 @@ const randomizeEffects = key => track => {
 };
 
 export const createScene = () => {
-  const globalKey = randRange(-4, 4);
   const newScene = {
     tempo: randRange(132, 140),
-    shufflePercentage: maybe(50, 0, randRange(1, 20)),
+    shufflePercentage: maybe(50, 0, randRange(1, 10)),
     parts: {},
     synths: {
-      [tracks.LD]: {}
+      [tracks.LD]: {type: maybe(70, 'sawtooth', 'square')}
     },
   };
   [
@@ -105,11 +104,40 @@ export const createScene = () => {
 
   newScene.parts[tracks.HO] = createPart(tracks.HO);
   newScene.parts[tracks.HC] = createPart(tracks.HC);
+  newScene.parts[tracks.CR] = createPart(tracks.CR);
 
-  newScene.parts[tracks.BS] = createPart(tracks.BS, globalKey);
-  newScene.parts[tracks.MB] = createPart(tracks.MB, globalKey);
+  const beatMs = 60.0 / newScene.tempo;
+  const theme = createTheme();
 
-  newScene.parts[tracks.LD] = createPart(tracks.LD, globalKey);
+  newScene.parts[tracks.BS] = createPart(tracks.BS, theme);
+  newScene.parts[tracks.MB] = createPart(tracks.MB, theme);
+  newScene.parts[tracks.MB].inserts = [
+    {
+      effect: 'FeedbackDelay',
+      params: {
+        dry: 1,
+        wet: 0.4,
+        feedback: 0.4,
+        delayTime: beatMs * 0.751,
+        filterFrequency: 5000,
+      },
+    }
+  ];
+
+  newScene.parts[tracks.LD] = createPart(tracks.LD, theme);
+  newScene.parts[tracks.LD].inserts = [
+    {
+      effect: 'StereoDelay',
+      params: {
+        dry: 0.9,
+        wet: 0.5,
+        feedback: 0.7,
+        delayTimeL: beatMs * 0.505,
+        delayTimeR: beatMs * 0.748,
+        filterFrequency: 8000
+      },
+    }
+  ];
 
   if (rand(70)) {
     // newScene.parts[tracks.RD] = createPart(tracks.RD);

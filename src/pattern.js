@@ -1,4 +1,4 @@
-import {randRange, rand, maybe} from './util';
+import {randRange, rand, maybe, takeRandom, shuffle, sample, without} from './util';
 import tracks from './tracks';
 import {
   FOURBYFOUR, TWOANDFOUR, BROKEN, RANDBUSY, OFFBEATS,
@@ -7,8 +7,14 @@ import {
 
 const createNote = (velocity = 0, pitch = null) => ({velocity, pitch});
 
-const iteratePattern = ({patternLength, pitch}, iterator) =>
-  Array.from({length: patternLength}).map((_, index) => iterator(index, pitch));
+const getCurrentRoot = (theme, index) =>
+  theme.chordSequence[Math.floor(index / 16)] + theme.globalKey;
+
+const iteratePattern = ({patternLength, pitch, theme}, iterator) =>
+  Array.from({length: patternLength}).map((_, index) => {
+    const adjustedPitch = theme ? getCurrentRoot(theme, index) : pitch;
+    return iterator(index, adjustedPitch);
+  });
 
 const prefs = {
   [tracks.BD]: {
@@ -132,21 +138,126 @@ const styleIterator = {
   },
 };
 
-export const createPattern = (track, style, globalKey) => {
-  const pitch = typeof globalKey !== 'undefined' ? globalKey : prefs[track].pitch();
-  const patternLength = prefs[track].patternLength();
-  return iteratePattern({patternLength, pitch}, styleIterator[style]);
+const getPatternLength = (track, theme) => {
+  let patternLength = track ? prefs[track].patternLength() : null;
+  if (theme && theme.chordSequence) {
+    patternLength = theme.chordSequence.length * 16;
+  }
+  return patternLength;
 };
 
-export const createLeadPattern = globalKey => {
-  return [
-    createNote(127, globalKey),
-    createNote(127, globalKey + 12),
-    createNote(),
-    createNote(127, globalKey),
-    createNote(127, globalKey + 14),
-    createNote(),
-    createNote(127, globalKey + 15),
-    createNote(),
-  ];
+export const createPattern = (track, style, theme) => {
+  const pitch = typeof theme !== 'undefined' ? theme.globalKey : prefs[track].pitch();
+  const patternLength = getPatternLength(track, theme);
+  return iteratePattern({patternLength, pitch, theme}, styleIterator[style]);
+};
+
+export const createLeadPattern = theme => {
+  const globalKey = theme.globalKey;
+  const patternLength = getPatternLength(null, theme);
+  let i = 0;
+  return Array.from({length: patternLength}).map((_, index) => {
+    const lastBar = 64 - (index % 64) <= 8;
+    const useMotif = lastBar ? theme.motif2 : theme.motif;
+    const rootPitch = getCurrentRoot(theme, index);
+    if (theme.rhythm.indexOf(index % 8) > -1) {
+      if (i >= useMotif.length) {
+        i = 0;
+      }
+      return createNote(127, globalKey + 12 + useMotif[i++]);
+    } else if (theme.rhythm2.indexOf(index % 8) > -1) {
+      return createNote(127, rootPitch);
+    }
+    return createNote();
+  });
+};
+
+const AEOLIAN = [0, 2, 3, 5, 7, 8, 10, 12];
+const PRIMARY = [0, 3, 7, 12];
+const SECONDARY = [2, 5, 10];
+
+const MOTIF_PRESETS = [
+  [0, 2, 3],
+  [10, 2, 3],
+  [2, 3, 5],
+  [2, 3, 7],
+  [0, 5, 7],
+  [0, 8, 7],
+  [0, 3, 5],
+  [3, 5, 12],
+  [5, 10, 7],
+];
+const choices = [].concat(PRIMARY).concat(SECONDARY);
+
+const createMotif = seed => {
+  if (seed) {
+    return shuffle([seed[0], seed[1], sample(without(seed, choices))]);
+  }
+  if (rand(50)) {
+    return shuffle(sample(MOTIF_PRESETS));
+  } else if (rand(50)) {
+    const motif1 = [sample(PRIMARY), sample(SECONDARY)];
+    const motif = shuffle(motif1.concat(sample(without(motif1, AEOLIAN))));
+    return motif;
+  }
+  return takeRandom(3, choices);
+};
+
+const CHORD_PRESETS = [
+  [0, 0, -2, -4],
+  [-4, -4, -2, 0],
+  [0, -2, -4, 0],
+  [-5, -4, -2, 0],
+  [-4, -2, -4, 0],
+  [0, -5, -2, -4],
+  [0, -5, -4, -2],
+  [0, -4, 3, 2],
+  [-5, -4, -2, -5],
+  [0, 3, -2, -4],
+  [-4, 5, 0, 0],
+];
+
+const createChords = lengthBars => {
+  if (rand(75)) {
+    const preset = sample(CHORD_PRESETS);
+    if (lengthBars === preset.length) {
+      return preset;
+    }
+    const chordSequence = [];
+    for (let i = 0; i < lengthBars; ++i) {
+      chordSequence.push(preset[Math.floor(i / 2)]);
+    }
+    return chordSequence;
+  }
+  let chords = [0, -2, -4];
+  if (rand(30)) {
+    chords = takeRandom(4, [0, -2, -4, -5, 3, 5]);
+  }
+  const chordSequence = [];
+  const shuffled = shuffle(chords);
+  for (let i = 0; i < lengthBars; ++i) {
+    chordSequence.push(sample(shuffled));
+  }
+  return chordSequence;
+};
+
+export const createTheme = () => {
+  const globalKey = randRange(-4, 4);
+  const lengthBars = maybe(50, 4, 8);
+  const chordSequence = createChords(lengthBars);
+  const motif = createMotif();
+  const motif2 = createMotif(motif);
+  const rhythm = takeRandom(3, [0, 1, 2, 3, 4, 5, 6, 7]);
+  const rhythm2 = takeRandom(3, without(rhythm, [0, 1, 2, 3, 4, 5, 6, 7]));
+  console.log(motif, motif2);
+  console.log(rhythm);
+  console.log(chordSequence);
+  return {
+    globalKey,
+    chordSequence,
+    motif,
+    motif2,
+    rhythm,
+    rhythm2,
+  };
 };

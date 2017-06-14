@@ -6,6 +6,7 @@ export default {
   bs: 3,
   mb: 3,
   impulse: 1,
+  cr: 1,
   /* pr: 6,
   rd: 3,
   sn: 2,

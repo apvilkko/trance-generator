@@ -3,7 +3,7 @@ import {playSample, playSynth, triggerEnvelope} from './components';
 
 const normalizeVelocity = velocity => velocity / 127.0;
 
-const gateOn = (context, destination, buffer, note, synth, instance) => {
+const gateOn = (context, destination, buffer, note, synth, instance, trackGain) => {
   if (buffer) {
     playSample({
       context,
@@ -14,14 +14,12 @@ const gateOn = (context, destination, buffer, note, synth, instance) => {
     triggerEnvelope({
       context,
       param: destination.gain,
-      sustain: normalizeVelocity(note.velocity)
+      sustain: normalizeVelocity(note.velocity) * trackGain,
     });
   }
   if (synth) {
     playSynth({
       context,
-      destination,
-      synth,
       pitch: note.pitch,
       instance,
     });
@@ -29,7 +27,7 @@ const gateOn = (context, destination, buffer, note, synth, instance) => {
       context,
       release: instance.release || 2.0,
       param: destination.gain,
-      sustain: normalizeVelocity(note.velocity)
+      sustain: normalizeVelocity(note.velocity) * trackGain,
     });
   }
 };
@@ -40,15 +38,16 @@ const getDestination = track => (track ? track.gain : null);
 export const playNote = (ctx, key, note) => {
   const {state: {mixer: {tracks}, scene: {parts}}} = ctx;
   const destination = getDestination(tracks[key]);
+  const trackGain = tracks[key].trackGain;
   const synth = parts[key].synth;
   const isSample = !synth;
   if (isSample) {
     const buffer = ctx.runtime.buffers[parts[key].sample];
     if (buffer && destination) {
-      gateOn(getContext(ctx), destination, buffer, note);
+      gateOn(getContext(ctx), destination, buffer, note, null, null, trackGain);
     }
   } else {
     const instance = ctx.runtime.synths[synth];
-    gateOn(getContext(ctx), destination, null, note, synth, instance);
+    gateOn(getContext(ctx), destination, null, note, synth, instance, trackGain);
   }
 };
