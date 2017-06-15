@@ -15,19 +15,7 @@ const App = ({actions}) => (
         <Params actions={actions} />
         {/* <pre style={{textAlign: 'left', fontSize: '80%'}}>{JSON.stringify(window.ctx, null, 2)}</pre> */}
         <div className="history">
-          <div>v0.2
-            <ul>
-              <li>feature: breakdown</li>
-              <li>improved motif, chord & pattern generation</li>
-              <li>feature: synth filter adjustment</li>
-              <li>fixed: mixer track gains</li>
-            </ul>
-          </div>
-          <div>v0.1
-            <ul>
-              <li>initial version</li>
-            </ul>
-          </div>
+          <div>v0.3{' '}<a href="https://github.com/apvilkko/trance-generator">github</a></div>
         </div>
       </div>
     </div>

@@ -38,13 +38,18 @@ createMixer(ctx, {
   [tracks.CL]: {gain: 0.6},
   [tracks.HC]: {gain: 0.6},
   [tracks.HO]: {gain: 0.6},
+  [tracks.SN]: {gain: 0.55},
   [tracks.BS]: {gain: 0.5},
   [tracks.MB]: {gain: 0.5},
   [tracks.LD]: {gain: 0.4},
   [tracks.CR]: {gain: 0.5},
+  [tracks.RD]: {gain: 0.25},
+  [tracks.LP]: {gain: 0.3},
 });
 newScene(ctx);
-start(ctx);
+setTimeout(() => {
+  start(ctx);
+}, 1000);
 
 export const actions = {
   newScene: () => newScene(ctx),

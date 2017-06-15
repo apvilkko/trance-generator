@@ -10,5 +10,6 @@ const RD = 'RD';
 const SN = 'SN';
 const LD = 'LD';
 const CR = 'CR';
+const LP = 'LP';
 
-export default {BD, BS, MB, CL, HC, HO, ST, PR, RD, SN, LD, CR};
+export default {BD, BS, MB, CL, HC, HO, ST, PR, RD, SN, LD, CR, LP};

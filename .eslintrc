@@ -34,7 +34,8 @@
     "arrow-parens": ["error", "as-needed"],
     "no-param-reassign": ["error", {"props": false}],
     "no-restricted-properties": 0,
-    "no-plusplus": 0
+    "no-plusplus": 0,
+    "no-continue": 0
   },
   "plugins": [
     "import"

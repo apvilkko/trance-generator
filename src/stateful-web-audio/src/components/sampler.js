@@ -10,5 +10,6 @@ export const playSample = ({context, destination, buffer, pitch = 0}) => {
   if (pitch !== 0) {
     node.playbackRate.value = getRateFromPitch(pitch);
   }
+  // console.log('playSample', pitch, context.currentTime);
   node.start(0);
 };

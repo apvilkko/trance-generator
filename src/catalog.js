@@ -7,8 +7,21 @@ export default {
   mb: 3,
   impulse: 1,
   cr: 1,
-  /* pr: 6,
-  rd: 3,
-  sn: 2,
-  st: 6, */
+  sn: 1,
+  rd: 1,
+  lp: 3,
+  lpInfo: {
+    1: {
+      tempo: 139,
+      bars: 2,
+    },
+    2: {
+      tempo: 138,
+      bars: 1,
+    },
+    3: {
+      tempo: 140,
+      bars: 1,
+    }
+  },
 };

@@ -14,7 +14,7 @@ export const initialState = ({
 const addInsertEffect = (ctx, key, insert, index, insertSpec = {}) => {
   const context = getContext(ctx);
   const spec = {...insertSpec, context, ...insert.params};
-  console.log('addInsertEffect', spec);
+  // console.log('addInsertEffect', spec);
   const insertEffect = createInsertEffect({
     context,
     effect: components[`create${insert.effect}`](spec)

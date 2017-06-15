@@ -14,6 +14,7 @@ const gateOn = (context, destination, buffer, note, synth, instance, trackGain) 
     triggerEnvelope({
       context,
       param: destination.gain,
+      release: note.release || 2.0,
       sustain: normalizeVelocity(note.velocity) * trackGain,
     });
   }

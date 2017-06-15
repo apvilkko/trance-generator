@@ -3,20 +3,24 @@ import tracks from './tracks';
 import {createPattern, createLeadPattern, createTheme} from './pattern';
 import styles, {
   FOURBYFOUR, BROKEN, OFFBEATS, RANDBUSY, TWOANDFOUR,
-  RANDSPARSE, OCCASIONAL, SUBBASS1, SUBBASS2, MIDBASS1
+  RANDSPARSE, OCCASIONAL, SUBBASS1, SUBBASS2, MIDBASS1, EIGHTS, ONESHOT,
 } from './styles';
 import catalog from './catalog';
 
 const randomizeStyle = track => {
   switch (track) {
+    case tracks.LP:
+      return ONESHOT;
     case tracks.BD:
       return FOURBYFOUR;
     case tracks.CL:
       return TWOANDFOUR;
     case tracks.HO:
       return OFFBEATS;
+    case tracks.SN:
+      return RANDBUSY;
     case tracks.RD:
-      return maybe({50: OFFBEATS, 32: FOURBYFOUR, rest: sample(styles)});
+      return maybe(50, OFFBEATS, EIGHTS);
     case tracks.HC:
       return maybe(75, RANDBUSY,
                sample([BROKEN, RANDSPARSE, FOURBYFOUR, OFFBEATS]));
@@ -31,41 +35,44 @@ const randomizeStyle = track => {
   }
 };
 
-const createLead = globalKey => {
-  return {
-    style: null,
-    sample: null,
-    synth: tracks.LD,
-    pattern: createLeadPattern(globalKey)
-  };
-};
+const createLead = globalKey => ({
+  style: null,
+  sample: null,
+  synth: tracks.LD,
+  pattern: createLeadPattern(globalKey)
+});
 
 const randomizeSample = track => {
   const key = track.toLowerCase();
   const numChoices = catalog[key];
-  return `${key}${randRange(1, numChoices)}`;
+  const chosen = randRange(1, numChoices);
+  return {
+    sampleKey: `${key}${chosen}`,
+    info: (catalog[`${key}Info`] || {})[chosen],
+  };
 };
 
 const urlify = sample => `samples/${sample}.ogg`;
 
-const createPart = (track, theme) => {
+const createPart = (track, theme, tempo) => {
   if (track === tracks.LD) {
     return createLead(theme);
   }
   const style = randomizeStyle(track);
-  const sample = randomizeSample(track);
-  // console.log('part', sample, style, theme);
+  const {sampleKey, info} = randomizeSample(track);
+  // console.log('part', sampleKey, info, style, theme);
   return {
     style,
-    sample: urlify(sample),
-    pattern: track === tracks.CR ? null : createPattern(track, style, theme),
+    sample: urlify(sampleKey),
+    info,
+    pattern: track === tracks.CR ? null : createPattern(track, style, theme, info, tempo),
   };
 };
 
 const reverbSpec = (dry, wet) => ({
   effect: 'Reverb',
   params: {dry, wet},
-  sample: urlify(randomizeSample('impulse'))
+  sample: urlify(randomizeSample('impulse').sampleKey)
 });
 
 const randomizeEffects = key => track => {
@@ -84,12 +91,22 @@ const randomizeEffects = key => track => {
 };
 
 export const createScene = () => {
+  const tempo = randRange(132, 142);
   const newScene = {
-    tempo: randRange(132, 140),
+    tempo,
     shufflePercentage: maybe(50, 0, randRange(1, 10)),
     parts: {},
     synths: {
-      [tracks.LD]: {type: maybe(70, 'sawtooth', 'square')}
+      [tracks.LD]: {
+        type: maybe(70, 'sawtooth', 'square'),
+        vcos: [
+          {detune: 0},
+          {detune: randRange(-10, -3)},
+          {detune: randRange(3, 10)},
+          {detune: randRange(-20, -11)},
+          {detune: randRange(11, 20)},
+        ],
+      }
     },
   };
   [
@@ -105,6 +122,8 @@ export const createScene = () => {
   newScene.parts[tracks.HO] = createPart(tracks.HO);
   newScene.parts[tracks.HC] = createPart(tracks.HC);
   newScene.parts[tracks.CR] = createPart(tracks.CR);
+  newScene.parts[tracks.SN] = createPart(tracks.SN);
+  newScene.parts[tracks.LP] = createPart(tracks.LP, null, tempo);
 
   const beatMs = 60.0 / newScene.tempo;
   const theme = createTheme();
@@ -139,11 +158,8 @@ export const createScene = () => {
     }
   ];
 
-  if (rand(70)) {
-    // newScene.parts[tracks.RD] = createPart(tracks.RD);
-  }
-  if (rand(50)) {
-    // newScene.parts[tracks.SN] = createPart(tracks.SN);
+  if (rand(75)) {
+    newScene.parts[tracks.RD] = createPart(tracks.RD);
   }
   return newScene;
 };

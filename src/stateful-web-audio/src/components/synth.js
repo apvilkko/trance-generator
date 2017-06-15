@@ -29,17 +29,28 @@ export const setSynthParam = (ctx, instance, params, value) => {
 
 export const createSynth = ({context, destination, options}) => {
   const opts = options || {type: 'sawtooth'};
-  const node = createVCA({context, gain: 1});
-  const vco1 = createVCO({context, type: opts.type});
-  const vco2 = createVCO({context, type: opts.type});
+  const node = createVCA({context, gain: 0.8});
+  const numVcos = 5;
+  const vcos = [];
+  for (let i = 0; i < numVcos; ++i) {
+    vcos.push(createVCO({context, type: opts.type}));
+  }
   const highpass = createFilter({context, frequency: 150, destination: node});
   highpass.type = 'highpass';
   const peakFilter = createFilter({context, frequency: 8000, destination: highpass});
   peakFilter.type = 'peaking';
   peakFilter.gain.value = 6;
   const filter = createFilter({context, frequency: 8000, destination: peakFilter});
-  connect(vco1, filter);
-  connect(vco2, filter);
+  const merger = context.createChannelMerger(2);
+  connect(merger, filter);
+  for (let i = 0; i < numVcos; ++i) {
+    if (i === 0) {
+      connect(vcos[i], merger, 0, 0);
+      connect(vcos[i], merger, 0, 1);
+    } else {
+      connect(vcos[i], merger, 0, i % 2 === 0 ? 0 : 1);
+    }
+  }
   if (destination) {
     connect(node, destination);
   }
@@ -48,20 +59,12 @@ export const createSynth = ({context, destination, options}) => {
     release: 0.1,
     filter,
     peakFilter,
-    vcos: [
-      {
-        instance: vco1,
-        params: {
-          detune: -9,
-        },
-      },
-      {
-        instance: vco2,
-        params: {
-          detune: 5
-        },
-      }
-    ],
+    merger,
+    highpass,
+    vcos: vcos.map((x, i) => ({
+      instance: x,
+      params: opts.vcos[i]
+    })),
     output: node,
   };
 };

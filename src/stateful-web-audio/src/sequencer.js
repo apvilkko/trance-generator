@@ -16,6 +16,8 @@ export const initialRuntime = runtime => ({
 
 const beatLen = tempo => 60.0 / tempo;
 
+const randRange = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+
 const scheduleNote = ctx => {
   const {state, runtime} = ctx;
   const currentNote = runtime.sequencer.currentNote;
@@ -32,6 +34,10 @@ const scheduleNote = ctx => {
   if (!bdStart && bdReqStart !== -1000) {
     bdStart = bdReqStart + (distanceBeats * beatLen(tempo));
     runtime.sequencer.breakdownAdjustedStart = bdStart;
+    runtime.sequencer.breakdownSnPattern = Math.random() > 0.5;
+    runtime.sequencer.breakdownKick = Math.random() > 0.5;
+    runtime.sequencer.breakdownKickEnd = Math.random() > 0.7 ? 1.0 :
+      1.0 - (1.0 / Math.pow(2, randRange(3, 5)));
   }
   const bdPhase = (runtime.instances.context.currentTime - bdStart) / breakdownLen;
   const isBreakdown = bdPhase >= 0 && bdPhase <= 1.0;
@@ -42,10 +48,12 @@ const scheduleNote = ctx => {
     if (isFirst && key === 'CR') {
       playNote(ctx, key, {velocity: 127});
     }
-    if (isBreakdown && key !== 'LD') {
+    if (!isBreakdown && key === 'SN') {
       continue;
     }
+    let snNote;
     if (isBreakdown) {
+      snNote = {velocity: (bdPhase * 2 - 1) * 127};
       setParam({ctx, name: 'LD.synth.vcf.frequency', value: 20 + 8000 * bdPhase});
       setParam({ctx, name: 'LD.synth.vcf.Q', value: 60 + ((1.0 - bdPhase) * 30)});
       runtime.sequencer.breakdown = true;
@@ -58,9 +66,21 @@ const scheduleNote = ctx => {
     }
     const track = scene.parts[key].pattern;
     if (track) {
+      const shouldPlaySn = key === 'SN' && bdPhase >= 0.5;
+      const shouldPlayKick = isBreakdown && key === 'BD' &&
+        bdPhase >= 0.5 && bdPhase <= runtime.sequencer.breakdownKickEnd;
       const note = track[currentNote % track.length];
+      if ((shouldPlaySn && !runtime.sequencer.breakdownSnPattern) ||
+        (shouldPlayKick && runtime.sequencer.breakdownKick)) {
+        playNote(ctx, key, {...note, ...snNote});
+        continue;
+      }
       if (note.velocity) {
-        playNote(ctx, key, note);
+        if (shouldPlaySn && runtime.sequencer.breakdownSnPattern) {
+          playNote(ctx, key, snNote);
+        } else if (!isBreakdown || (key === 'LD')) {
+          playNote(ctx, key, note);
+        }
       }
     }
   }

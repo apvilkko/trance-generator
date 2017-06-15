@@ -8,6 +8,8 @@ export const OFFBEATS = 'offbeats';
 export const SUBBASS1 = 'subbass1';
 export const SUBBASS2 = 'subbass2';
 export const MIDBASS1 = 'midbass1';
+export const EIGHTS = 'eights';
+export const ONESHOT = 'oneshot';
 
 export default [
   FOURBYFOUR,
@@ -20,4 +22,6 @@ export default [
   SUBBASS1,
   SUBBASS2,
   MIDBASS1,
+  EIGHTS,
+  ONESHOT,
 ];

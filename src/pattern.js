@@ -2,7 +2,7 @@ import {randRange, rand, maybe, takeRandom, shuffle, sample, without} from './ut
 import tracks from './tracks';
 import {
   FOURBYFOUR, TWOANDFOUR, BROKEN, RANDBUSY, OFFBEATS,
-  RANDSPARSE, OCCASIONAL, SUBBASS1, SUBBASS2, MIDBASS1
+  RANDSPARSE, OCCASIONAL, SUBBASS1, SUBBASS2, MIDBASS1, EIGHTS, ONESHOT,
 } from './styles';
 
 const createNote = (velocity = 0, pitch = null) => ({velocity, pitch});
@@ -17,6 +17,10 @@ const iteratePattern = ({patternLength, pitch, theme}, iterator) =>
   });
 
 const prefs = {
+  [tracks.LP]: {
+    patternLength: () => 16,
+    pitch: () => 0,
+  },
   [tracks.BD]: {
     patternLength: () => maybe(50, 16, 32),
     pitch: () => randRange(-2, 2),
@@ -55,7 +59,7 @@ const prefs = {
   },
   [tracks.RD]: {
     patternLength: () => maybe(50, 8, 16),
-    pitch: () => randRange(-2, 2),
+    pitch: () => randRange(-2, 3),
   }
 };
 
@@ -76,9 +80,23 @@ const styleIterator = {
     }
     return createNote();
   },
+  [EIGHTS]: (i, pitch) => {
+    if (i % 4 === 0 || (i + 2) % 4 === 0) {
+      return createNote(randRange(110, 127), pitch);
+    } else if (rand(5)) {
+      return createNote(randRange(10, 110), pitch);
+    }
+    return createNote();
+  },
   [RANDBUSY]: (i, pitch) => {
     if (rand(80)) {
       return createNote(randRange(90, 127), pitch);
+    }
+    return createNote();
+  },
+  [ONESHOT]: (i, pitch) => {
+    if (i === 0) {
+      return {...createNote(127, pitch), release: 1000};
     }
     return createNote();
   },
@@ -146,9 +164,13 @@ const getPatternLength = (track, theme) => {
   return patternLength;
 };
 
-export const createPattern = (track, style, theme) => {
-  const pitch = typeof theme !== 'undefined' ? theme.globalKey : prefs[track].pitch();
-  const patternLength = getPatternLength(track, theme);
+export const createPattern = (track, style, theme, info, tempo) => {
+  // console.log('createPattern', track, style, theme, info, tempo);
+  let pitch = theme ? theme.globalKey : prefs[track].pitch();
+  if (info && info.tempo && tempo) {
+    pitch = 12 * Math.log(tempo / info.tempo) / Math.log(2);
+  }
+  const patternLength = (info && info.bars) ? (info.bars * 16) : getPatternLength(track, theme);
   return iteratePattern({patternLength, pitch, theme}, styleIterator[style]);
 };
 
