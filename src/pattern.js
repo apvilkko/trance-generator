@@ -1,4 +1,4 @@
-import {randRange, rand, maybe, takeRandom, shuffle, sample, without} from './util';
+import {randRange, rand, maybe, takeRandom, shuffle, sample, without, sort} from './util';
 import tracks from './tracks';
 import {
   FOURBYFOUR, TWOANDFOUR, BROKEN, RANDBUSY, OFFBEATS,
@@ -174,9 +174,9 @@ export const createPattern = (track, style, theme, info, tempo) => {
   return iteratePattern({patternLength, pitch, theme}, styleIterator[style]);
 };
 
-export const createLeadPattern = theme => {
-  const globalKey = theme.globalKey;
-  const patternLength = getPatternLength(null, theme);
+const transposeMotif = (note, theme) => theme.globalKey + 12 + note;
+
+const leadPattern1 = ({patternLength, theme}) => {
   let i = 0;
   return Array.from({length: patternLength}).map((_, index) => {
     const lastBar = 64 - (index % 64) <= 8;
@@ -186,12 +186,42 @@ export const createLeadPattern = theme => {
       if (i >= useMotif.length) {
         i = 0;
       }
-      return createNote(127, globalKey + 12 + useMotif[i++]);
+      return createNote(127, transposeMotif(useMotif[i++], theme));
     } else if (theme.rhythm2.indexOf(index % 8) > -1) {
       return createNote(127, rootPitch);
     }
     return createNote();
   });
+};
+
+const ARP_PRESETS = [
+  [0, 0, 0, 1],
+  [0, 0, 0, 2],
+  [0, 1, 0, 2],
+  [0, 2, 0, 1],
+  [0, 0, 1, 2],
+];
+
+const leadPatternArp = ({patternLength, theme}) => {
+  const motifs = [sort(theme.motif), sort(theme.motif2), sort(theme.motif3)];
+  const arpPattern = sample(ARP_PRESETS).concat(sample(ARP_PRESETS));
+  return Array.from({length: patternLength}).map((_, index) => {
+    const rootPitch = getCurrentRoot(theme, index);
+    const quarter = Math.floor(index * 0.25) % arpPattern.length;
+    const motif = motifs[arpPattern[quarter]];
+    const pitch = index % 4 === 0 ? rootPitch :
+      transposeMotif(motif[index % 4 - 1], theme);
+    return createNote(127, pitch);
+  });
+};
+
+export const createLeadPattern = theme => {
+  const patternLength = getPatternLength(null, theme);
+  const opts = {theme, patternLength};
+  if (theme.arp) {
+    return leadPatternArp(opts);
+  }
+  return leadPattern1(opts);
 };
 
 const AEOLIAN = [0, 2, 3, 5, 7, 8, 10, 12];
@@ -269,9 +299,10 @@ export const createTheme = () => {
   const chordSequence = createChords(lengthBars);
   const motif = createMotif();
   const motif2 = createMotif(motif);
+  const motif3 = createMotif(motif);
   const rhythm = takeRandom(3, [0, 1, 2, 3, 4, 5, 6, 7]);
   const rhythm2 = takeRandom(3, without(rhythm, [0, 1, 2, 3, 4, 5, 6, 7]));
-  console.log(motif, motif2);
+  console.log(motif, motif2, motif3);
   console.log(rhythm);
   console.log(chordSequence);
   return {
@@ -279,7 +310,9 @@ export const createTheme = () => {
     chordSequence,
     motif,
     motif2,
+    motif3,
     rhythm,
     rhythm2,
+    arp: maybe(50, true, false),
   };
 };

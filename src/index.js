@@ -4,7 +4,10 @@ import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 
-import {actions} from './main';
+import {actions, store} from './main';
 
-ReactDOM.render(<App actions={actions} />, document.getElementById('root'));
+ReactDOM.render(
+  <App actions={actions} store={store} />,
+  document.getElementById('root')
+);
 registerServiceWorker();

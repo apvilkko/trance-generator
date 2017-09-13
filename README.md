@@ -6,7 +6,8 @@
 * ~~breakdown fills~~
 * ~~perc loop track~~
 * ~~ride~~
-* channel mixer controls (mute/solo)
-* better samples
-* arp-style lead pattern variant
+* ~~channel mixer controls (mute/solo)~~
+* ~~better samples~~
+* ~~arp-style lead pattern variant~~
 * (chopped) string pad
+* seed/hash that can be used to recreate a scene

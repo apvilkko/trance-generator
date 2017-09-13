@@ -79,7 +79,7 @@ const randomizeEffects = key => track => {
   const inserts = [];
   switch (key) {
     case tracks.CL:
-      inserts.push(reverbSpec(1, randRangeFloat(0.1, 0.5)));
+      inserts.push(reverbSpec(1, randRangeFloat(0.05, 0.1)));
       break;
     case tracks.ST:
       // inserts.push(reverbSpec(1, randRangeFloat(0.1, 0.8)));

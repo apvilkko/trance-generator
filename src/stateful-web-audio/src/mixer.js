@@ -29,7 +29,7 @@ export const setNodeGain = (node, value) => {
 };
 
 export const setTrackGain = (mixer, track, value) => {
-  setNodeGain(mixer[track].gain, value);
+  setNodeGain(mixer.tracks[track].gain, value);
 };
 
 export const getInsert = (ctx, key, index) =>

@@ -50,3 +50,12 @@ export const shuffle = list => {
 export const takeRandom = (num, arr) => shuffle(arr).slice(0, num);
 
 export const without = (these, arr) => arr.filter(x => !these.includes(x));
+
+export const fromPairs = arr =>
+  Object.assign(...arr.map(([k, v]) => ({[k]: v})));
+
+export const sort = arr => {
+  const newArr = [...arr];
+  newArr.sort();
+  return newArr;
+};

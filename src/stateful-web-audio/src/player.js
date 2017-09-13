@@ -38,6 +38,9 @@ const getDestination = track => (track ? track.gain : null);
 
 export const playNote = (ctx, key, note) => {
   const {state: {mixer: {tracks}, scene: {parts}}} = ctx;
+  if (tracks[key].muted) {
+    return;
+  }
   const destination = getDestination(tracks[key]);
   const trackGain = tracks[key].trackGain;
   const synth = parts[key].synth;
