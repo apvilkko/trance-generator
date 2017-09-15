@@ -1,3 +1,5 @@
+import uuidv4 from 'uuid/v4';
+import 'seedrandom';
 import {randRange, randRangeFloat, maybe, sample, rand} from './util';
 import tracks from './tracks';
 import {createPattern, createLeadPattern, createTheme} from './pattern';
@@ -90,9 +92,14 @@ const randomizeEffects = key => track => {
   return {...track, inserts};
 };
 
-export const createScene = () => {
+export const createScene = (store, loadSeed) => {
+  const seed = loadSeed || uuidv4().substr(0, 8);
+  window.history.pushState('', '', `?s=${encodeURIComponent(seed)}`);
+  store.setSeed(seed);
+  Math.seedrandom(seed);
   const tempo = randRange(132, 142);
   const newScene = {
+    seed,
     tempo,
     shufflePercentage: maybe(50, 0, randRange(1, 10)),
     parts: {},

@@ -1,6 +1,7 @@
 import React from 'react';
 import Params from './Params';
 import Mixer from './Mixer';
+import Seed from './Seed';
 import './App.css';
 
 const App = ({actions, store}) => (
@@ -15,9 +16,10 @@ const App = ({actions, store}) => (
         <button onClick={actions.breakdown}>request breakdown</button>
         <Params actions={actions} />
         <Mixer toggle={actions.toggleChannel} store={store} />
+        <Seed load={actions.load} store={store} />
         {/* <pre style={{textAlign: 'left', fontSize: '80%'}}>{JSON.stringify(window.ctx, null, 2)}</pre> */}
         <div className="history">
-          <div>v0.4{' '}<a href="https://github.com/apvilkko/trance-generator">github</a></div>
+          <div>v0.5{' '}<a href="https://github.com/apvilkko/trance-generator">github</a></div>
         </div>
       </div>
     </div>

@@ -6,6 +6,11 @@ const store = observable({
   mixerState: fromPairs(
     Object.keys(tracks).map(key => [key, {solo: false, mute: false}])
   ),
+  currentSeed: '',
+});
+
+store.setSeed = action(seed => {
+  store.currentSeed = seed;
 });
 
 store.setChannel = action((key, action) => {

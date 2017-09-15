@@ -13,8 +13,20 @@ import {createScene} from './scene';
 import tracks from './tracks';
 import mixerStore from './store';
 
-const newScene = ctx => {
-  const scene = createScene();
+export const store = mixerStore;
+
+function getParameterByName(paramName) {
+  const url = window.location.href;
+  const name = paramName.replace(/[[\]]/g, '\\$&');
+  const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
+  const results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+const newScene = (ctx, seed) => {
+  const scene = createScene(store, seed);
   setScene(ctx, scene);
 };
 
@@ -32,8 +44,6 @@ const toggle = ctx => {
   return !playing;
 };
 
-export const store = mixerStore;
-
 const toggleChannel = ctx => (key, solo) => {
   const newState = store.setChannel(key, solo ? 'solo' : 'mute');
   Object.keys(tracks).forEach(track => {
@@ -42,6 +52,10 @@ const toggleChannel = ctx => (key, solo) => {
       mixerTrack.muted = newState[track].mute;
     }
   });
+};
+
+const load = ctx => seed => {
+  newScene(ctx, seed);
 };
 
 const ctx = init();
@@ -59,7 +73,7 @@ createMixer(ctx, {
   [tracks.RD]: {gain: 0.6},
   [tracks.LP]: {gain: 0.5},
 });
-newScene(ctx);
+newScene(ctx, getParameterByName('s') || null);
 setTimeout(() => {
   start(ctx);
 }, 1000);
@@ -71,6 +85,7 @@ export const actions = {
   setParam: params => evt => setParam({ctx, value: evt.target.value, ...params}),
   breakdown: () => breakdown(ctx),
   toggleChannel: toggleChannel(ctx),
+  load: load(ctx),
 };
 
 // initEvents(document, actions);

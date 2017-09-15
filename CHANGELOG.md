@@ -1,3 +1,6 @@
+v0.5
+- recall scene with seed
+
 v0.4
 - new samples
 - feature: channel mute/solo

@@ -84,3 +84,21 @@ button {
 .mixer .active {
   background-color: yellow;
 }
+
+label + input {
+  margin-left: 0.5em;
+}
+
+.seed-input {
+  margin-top: 2em;
+}
+
+.seed-input input {
+  width: 8em;
+}
+
+.seed-input button {
+  margin-left: 0.5em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+}
