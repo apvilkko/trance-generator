@@ -10,4 +10,4 @@
 * ~~better samples~~
 * ~~arp-style lead pattern variant~~
 * (chopped) string pad
-* seed/hash that can be used to recreate a scene
+* ~~seed/hash that can be used to recreate a scene~~
