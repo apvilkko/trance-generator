@@ -16,6 +16,11 @@ const iteratePattern = ({patternLength, pitch, theme}, iterator) =>
     return iterator(index, adjustedPitch);
   });
 
+const LEAD_1 = '1';
+const LEAD_ARP = 'arp';
+const LEAD_34 = '34';
+const LEAD_ALGORITHMS = [LEAD_1, LEAD_ARP, LEAD_34];
+
 const prefs = {
   [tracks.LP]: {
     patternLength: () => 16,
@@ -215,16 +220,134 @@ const leadPatternArp = ({patternLength, theme}) => {
   });
 };
 
+const AEOLIAN = [0, 2, 3, 5, 7, 8, 10];
+
+const clamp = val => ((val + AEOLIAN.length) % AEOLIAN.length);
+const clamp12 = val => ((val + 24) % 12);
+
+const getScaleInterval = (key, root, interval) => {
+  const offset = clamp12(root - key);
+  const startIndex = AEOLIAN.findIndex(i => i === offset);
+  let highNote = AEOLIAN[clamp(startIndex + interval - Math.sign(interval))];
+  const lowNote = AEOLIAN[startIndex];
+  if (lowNote > highNote && interval > 0) {
+    highNote += 12;
+  }
+  return highNote - lowNote;
+};
+
+const getChanges = (patternLength, theme) => {
+  let oldRoot = null;
+  const ret = {};
+  Array.from({length: patternLength}).forEach((_, index) => {
+    const rootPitch = getCurrentRoot(theme, index);
+    if (rootPitch !== oldRoot) {
+      oldRoot = rootPitch;
+      ret[index] = rootPitch;
+    }
+    oldRoot = rootPitch;
+  });
+  const vals = Object.keys(ret).sort().concat(patternLength);
+  const lengths = {};
+  vals.forEach((val, i) => {
+    if (i > 0) {
+      lengths[vals[i - 1]] = val - vals[i - 1];
+    }
+  });
+  return {indexes: ret, lengths};
+};
+
+const createRhythmPattern = len => {
+  const ret = Array.from({length: len}).map(() => null);
+  const startIndex = randRange(0, 4);
+  for (let i = startIndex; i < len; i += 3) {
+    ret[i] = 1;
+  }
+  for (let i = 0; i < (len - 1); i += 2) {
+    if (ret[i] === null && ret[i + 1] === null) {
+      ret[i + randRange(0, 1)] = 0;
+    } else if (ret[i] === null && maybe(50, true, false)) {
+      ret[i] = 0;
+    } else if (ret[i + 1] === null && maybe(50, true, false)) {
+      ret[i + 1] = 0;
+    }
+  }
+  return ret;
+};
+
+const leadPattern34 = ({patternLength, theme}) => {
+  const {indexes, lengths} = getChanges(patternLength, theme);
+  let targetNote = null;
+  let currentNote = null;
+  let nextChange = null;
+  let tweenNote = null;
+  let tweenNote2 = null;
+  let chordLength = null;
+  let rhythm = null;
+  return Array.from({length: patternLength}).map((_, index) => {
+    const rootPitch = getCurrentRoot(theme, index);
+    const chordChanged = typeof indexes[index] !== 'undefined';
+    if (chordChanged) {
+      tweenNote = null;
+      tweenNote2 = null;
+      chordLength = lengths[index];
+      rhythm = rhythm || createRhythmPattern(chordLength);
+      nextChange = index + chordLength;
+      targetNote = rootPitch + 12 + getScaleInterval(theme.globalKey, rootPitch,
+        sample([3, 5, 8]));
+      if (maybe(25, true, false)) {
+        currentNote = targetNote;
+      }
+    }
+    if (currentNote === null) {
+      currentNote = targetNote;
+    }
+    if (index > nextChange - Math.floor(chordLength * 3 / 4)) {
+      if (tweenNote === null) {
+        tweenNote = transposeMotif(sample(theme.motif), theme);
+        if (tweenNote > targetNote + 12) {
+          tweenNote -= 12;
+        }
+      }
+      if (maybe(50, true, false)) {
+        currentNote = tweenNote;
+      }
+    }
+    if (index > nextChange - Math.floor(chordLength / 2)) {
+      if (tweenNote2 === null) {
+        tweenNote2 = targetNote + getScaleInterval(theme.globalKey,
+          targetNote, sample([-2, 2]));
+      }
+      if (maybe(60, true, false)) {
+        currentNote = tweenNote2;
+      }
+    }
+    if (index > nextChange - Math.floor(chordLength / 4)) {
+      currentNote = targetNote;
+    }
+    const rhythmIndex = index % rhythm.length;
+    const note = rhythm[rhythmIndex];
+    if (note === 0) {
+      return createNote(127, rootPitch);
+    } else if (note === 1) {
+      return createNote(127, currentNote);
+    }
+    return createNote();
+  });
+};
+
+const leadMap = {
+  1: leadPattern1,
+  arp: leadPatternArp,
+  34: leadPattern34,
+};
+
 export const createLeadPattern = theme => {
   const patternLength = getPatternLength(null, theme);
   const opts = {theme, patternLength};
-  if (theme.arp) {
-    return leadPatternArp(opts);
-  }
-  return leadPattern1(opts);
+  return leadMap[theme.leadAlgorithm](opts);
 };
 
-const AEOLIAN = [0, 2, 3, 5, 7, 8, 10, 12];
 const PRIMARY = [0, 3, 7, 12];
 const SECONDARY = [2, 5, 10];
 
@@ -249,7 +372,7 @@ const createMotif = seed => {
     return shuffle(sample(MOTIF_PRESETS));
   } else if (rand(50)) {
     const motif1 = [sample(PRIMARY), sample(SECONDARY)];
-    const motif = shuffle(motif1.concat(sample(without(motif1, AEOLIAN))));
+    const motif = shuffle(motif1.concat(sample(without(motif1, AEOLIAN.concat(12)))));
     return motif;
   }
   return takeRandom(3, choices);
@@ -313,6 +436,6 @@ export const createTheme = () => {
     motif3,
     rhythm,
     rhythm2,
-    arp: maybe(50, true, false),
+    leadAlgorithm: sample(LEAD_ALGORITHMS),
   };
 };

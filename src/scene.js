@@ -37,11 +37,11 @@ const randomizeStyle = track => {
   }
 };
 
-const createLead = globalKey => ({
+const createLead = theme => ({
   style: null,
   sample: null,
   synth: tracks.LD,
-  pattern: createLeadPattern(globalKey)
+  pattern: createLeadPattern(theme)
 });
 
 const randomizeSample = track => {
