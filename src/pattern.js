@@ -260,8 +260,23 @@ const getChanges = (patternLength, theme) => {
 const createRhythmPattern = len => {
   const ret = Array.from({length: len}).map(() => null);
   const startIndex = randRange(0, 4);
-  for (let i = startIndex; i < len; i += 3) {
-    ret[i] = 1;
+  const cycle = 3;
+  let offset = 0;
+  let i = 0;
+  while (i < len) {
+    if (i >= startIndex) {
+      if (maybe(50, true, false) && offset !== 0) {
+        offset = 0;
+      }
+      if ((i + offset) % cycle === 0) {
+        ret[i] = 1;
+      }
+      if (maybe(5, true, false) && offset === 0) {
+        offset = -1;
+        --i;
+      }
+    }
+    i++;
   }
   for (let i = 0; i < (len - 1); i += 2) {
     if (ret[i] === null && ret[i + 1] === null) {
@@ -283,7 +298,7 @@ const leadPattern34 = ({patternLength, theme}) => {
   let tweenNote = null;
   let tweenNote2 = null;
   let chordLength = null;
-  let rhythm = null;
+  const rhythm = createRhythmPattern(sample([32, 64]));
   return Array.from({length: patternLength}).map((_, index) => {
     const rootPitch = getCurrentRoot(theme, index);
     const chordChanged = typeof indexes[index] !== 'undefined';
@@ -291,7 +306,6 @@ const leadPattern34 = ({patternLength, theme}) => {
       tweenNote = null;
       tweenNote2 = null;
       chordLength = lengths[index];
-      rhythm = rhythm || createRhythmPattern(chordLength);
       nextChange = index + chordLength;
       targetNote = rootPitch + 12 + getScaleInterval(theme.globalKey, rootPitch,
         sample([3, 5, 8]));

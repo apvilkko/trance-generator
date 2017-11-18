@@ -1,3 +1,6 @@
+v0.6
+- new lead pattern algorithm "3:4"
+
 v0.5
 - recall scene with seed
 
