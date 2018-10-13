@@ -3,19 +3,21 @@ import {playSample, playSynth, triggerEnvelope} from './components';
 
 const normalizeVelocity = velocity => velocity / 127.0;
 
-const gateOn = (context, destination, buffer, note, synth, instance, trackGain) => {
+const gateOn = (context, destination, buffer, note, synth, instance, trackGain, delta) => {
   if (buffer) {
     playSample({
       context,
       destination,
       buffer,
-      pitch: note.pitch
+      pitch: note.pitch,
+      delta,
     });
     triggerEnvelope({
       context,
       param: destination.gain,
       release: note.release || 2.0,
       sustain: normalizeVelocity(note.velocity) * trackGain,
+      delta,
     });
   }
   if (synth) {
@@ -23,12 +25,14 @@ const gateOn = (context, destination, buffer, note, synth, instance, trackGain) 
       context,
       pitch: note.pitch,
       instance,
+      delta,
     });
     triggerEnvelope({
       context,
-      release: instance.release || 2.0,
       param: destination.gain,
+      release: instance.release || 2.0,
       sustain: normalizeVelocity(note.velocity) * trackGain,
+      delta,
     });
   }
 };
@@ -36,7 +40,7 @@ const gateOn = (context, destination, buffer, note, synth, instance, trackGain) 
 
 const getDestination = track => (track ? track.gain : null);
 
-export const playNote = (ctx, key, note) => {
+export const playNote = (ctx, key, note, delta = 0) => {
   const {state: {mixer: {tracks}, scene: {parts}}} = ctx;
   if (tracks[key].muted) {
     return;
@@ -48,10 +52,10 @@ export const playNote = (ctx, key, note) => {
   if (isSample) {
     const buffer = ctx.runtime.buffers[parts[key].sample];
     if (buffer && destination) {
-      gateOn(getContext(ctx), destination, buffer, note, null, null, trackGain);
+      gateOn(getContext(ctx), destination, buffer, note, null, null, trackGain, delta);
     }
   } else {
     const instance = ctx.runtime.synths[synth];
-    gateOn(getContext(ctx), destination, null, note, synth, instance, trackGain);
+    gateOn(getContext(ctx), destination, null, note, synth, instance, trackGain, delta);
   }
 };

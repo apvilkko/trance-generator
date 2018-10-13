@@ -10,6 +10,6 @@ export const setParam = ({ctx, ...params}) => {
     // not implemented
   } else {
     const instance = ctx.runtime.synths[synth];
-    setSynthParam(ctx, instance, keyParts.slice(1), params.value);
+    setSynthParam(ctx, instance, keyParts.slice(1), params.value, params.delta);
   }
 };

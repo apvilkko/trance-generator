@@ -8,15 +8,15 @@ const offsetFreq = (baseFreq, semitones, detuneCents = 0) =>
 
 const BASE_FREQ = offsetFreq(440, -21);
 
-export const playSynth = ({context, pitch = 0, instance}) => {
+export const playSynth = ({context, pitch = 0, instance, delta}) => {
   instance.vcos.forEach(vco => {
     const freq = offsetFreq(BASE_FREQ, pitch, vco.params.detune);
-    vco.instance.frequency.setValueAtTime(freq, context.currentTime);
+    vco.instance.frequency.setValueAtTime(freq, context.currentTime + delta);
   });
 };
 
-export const setSynthParam = (ctx, instance, params, value) => {
-  const time = getContext(ctx).currentTime;
+export const setSynthParam = (ctx, instance, params, value, delta) => {
+  const time = getContext(ctx).currentTime + delta;
   if (params.includes('vcf') && params.includes('frequency')) {
     instance.filter.frequency.setValueAtTime(value, time);
     instance.peakFilter.frequency.setValueAtTime(value, time);
