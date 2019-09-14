@@ -1,13 +1,23 @@
-import uuidv4 from 'uuid/v4';
-import 'seedrandom';
-import {randRange, randRangeFloat, maybe, sample, rand} from './util';
-import tracks from './tracks';
-import {createPattern, createLeadPattern, createTheme} from './pattern';
+import uuidv4 from "uuid/v4";
+import "seedrandom";
+import { randRange, randRangeFloat, maybe, sample, rand } from "./util";
+import tracks from "./tracks";
+import { createPattern, createLeadPattern, createTheme } from "./pattern";
 import styles, {
-  FOURBYFOUR, BROKEN, OFFBEATS, RANDBUSY, TWOANDFOUR,
-  RANDSPARSE, OCCASIONAL, SUBBASS1, SUBBASS2, MIDBASS1, EIGHTS, ONESHOT,
-} from './styles';
-import catalog from './catalog';
+  FOURBYFOUR,
+  BROKEN,
+  OFFBEATS,
+  RANDBUSY,
+  TWOANDFOUR,
+  RANDSPARSE,
+  OCCASIONAL,
+  SUBBASS1,
+  SUBBASS2,
+  MIDBASS1,
+  EIGHTS,
+  ONESHOT
+} from "./styles";
+import catalog from "./catalog";
 
 const randomizeStyle = track => {
   switch (track) {
@@ -24,8 +34,11 @@ const randomizeStyle = track => {
     case tracks.RD:
       return maybe(50, OFFBEATS, EIGHTS);
     case tracks.HC:
-      return maybe(75, RANDBUSY,
-               sample([BROKEN, RANDSPARSE, FOURBYFOUR, OFFBEATS]));
+      return maybe(
+        75,
+        RANDBUSY,
+        sample([BROKEN, RANDSPARSE, FOURBYFOUR, OFFBEATS])
+      );
     case tracks.ST:
       return sample([BROKEN, TWOANDFOUR, RANDSPARSE, RANDBUSY, OCCASIONAL]);
     case tracks.BS:
@@ -50,7 +63,7 @@ const randomizeSample = track => {
   const chosen = randRange(1, numChoices);
   return {
     sampleKey: `${key}${chosen}`,
-    info: (catalog[`${key}Info`] || {})[chosen],
+    info: (catalog[`${key}Info`] || {})[chosen]
   };
 };
 
@@ -61,20 +74,23 @@ const createPart = (track, theme, tempo) => {
     return createLead(theme);
   }
   const style = randomizeStyle(track);
-  const {sampleKey, info} = randomizeSample(track);
+  const { sampleKey, info } = randomizeSample(track);
   // console.log('part', sampleKey, info, style, theme);
   return {
     style,
     sample: urlify(sampleKey),
     info,
-    pattern: track === tracks.CR ? null : createPattern(track, style, theme, info, tempo),
+    pattern:
+      track === tracks.CR
+        ? null
+        : createPattern(track, style, theme, info, tempo)
   };
 };
 
 const reverbSpec = (dry, wet) => ({
-  effect: 'Reverb',
-  params: {dry, wet},
-  sample: urlify(randomizeSample('impulse').sampleKey)
+  effect: "Reverb",
+  params: { dry, wet },
+  sample: urlify(randomizeSample("impulse").sampleKey)
 });
 
 const randomizeEffects = key => track => {
@@ -89,12 +105,12 @@ const randomizeEffects = key => track => {
     default:
       break;
   }
-  return {...track, inserts};
+  return { ...track, inserts };
 };
 
 export const createScene = (store, loadSeed) => {
   const seed = loadSeed || uuidv4().substr(0, 8);
-  window.history.pushState('', '', `?s=${encodeURIComponent(seed)}`);
+  window.history.pushState("", "", `?s=${encodeURIComponent(seed)}`);
   store.setSeed(seed);
   Math.seedrandom(seed);
   const tempo = randRange(132, 142);
@@ -105,20 +121,20 @@ export const createScene = (store, loadSeed) => {
     parts: {},
     synths: {
       [tracks.LD]: {
-        type: maybe(70, 'sawtooth', 'square'),
+        type: maybe(70, "sawtooth", "square"),
         vcos: [
-          {detune: 0},
-          {detune: randRange(-10, -3)},
-          {detune: randRange(3, 10)},
-          {detune: randRange(-20, -11)},
-          {detune: randRange(11, 20)},
-        ],
+          { detune: 0 },
+          { detune: randRange(-10, -3) },
+          { detune: randRange(3, 10) },
+          { detune: randRange(-20, -11) },
+          { detune: randRange(11, 20) }
+        ]
       }
-    },
+    }
   };
   [
     tracks.BD,
-    tracks.CL,
+    tracks.CL
     /* tracks.ST,
     tracks.PR,
     tracks.BS */
@@ -139,21 +155,21 @@ export const createScene = (store, loadSeed) => {
   newScene.parts[tracks.MB] = createPart(tracks.MB, theme);
   newScene.parts[tracks.MB].inserts = [
     {
-      effect: 'FeedbackDelay',
+      effect: "FeedbackDelay",
       params: {
         dry: 1,
         wet: 0.4,
         feedback: 0.4,
         delayTime: beatMs * 0.751,
-        filterFrequency: 5000,
-      },
+        filterFrequency: 5000
+      }
     }
   ];
 
   newScene.parts[tracks.LD] = createPart(tracks.LD, theme);
   newScene.parts[tracks.LD].inserts = [
     {
-      effect: 'StereoDelay',
+      effect: "StereoDelay",
       params: {
         dry: 0.9,
         wet: 0.5,
@@ -161,7 +177,7 @@ export const createScene = (store, loadSeed) => {
         delayTimeL: beatMs * 0.505,
         delayTimeR: beatMs * 0.748,
         filterFrequency: 8000
-      },
+      }
     }
   ];
 

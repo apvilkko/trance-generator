@@ -1,8 +1,12 @@
-import {setSynthParam} from './components/synth';
+import { setSynthParam } from "./components/synth";
 
-export const setParam = ({ctx, ...params}) => {
-  const {state: {scene: {parts}}} = ctx;
-  const keyParts = params.name.split('.');
+export const setParam = ({ ctx, ...params }) => {
+  const {
+    state: {
+      scene: { parts }
+    }
+  } = ctx;
+  const keyParts = params.name.split(".");
   const key = keyParts[0];
   const synth = parts[key].synth;
   const isSample = !synth;

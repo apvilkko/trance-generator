@@ -1,13 +1,14 @@
-import {DEBUG} from './debug';
+import { DEBUG } from "./debug";
 
 export const getContext = ctx => ctx.runtime.instances.context;
 
 const log = (from, to, disconnect) => {
   if (!DEBUG) return;
-  console.log( // eslint-disable-line
-    disconnect ? 'disconnect' : 'connect',
+  console.log(
+    // eslint-disable-line
+    disconnect ? "disconnect" : "connect",
     Object.prototype.toString.call(from),
-    '=>',
+    "=>",
     Object.prototype.toString.call(to)
   );
 };
@@ -31,3 +32,5 @@ export const disconnect = (node, from) => {
   log(node, null, true);
   src.disconnect();
 };
+
+export const ensurePositive = value => (value < 0 ? 0 : value);
